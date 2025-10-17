@@ -21,22 +21,27 @@ export default function HomePage() {
 
       // Fade-in animation
       const elements = document.querySelectorAll('[data-fade]');
-      const newVisible = new Set(visibleElements);
+      
+      setVisibleElements(prev => {
+        const newVisible = new Set(prev);
+        let hasChanges = false;
 
-      elements.forEach((element, index) => {
-        const rect = element.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 100) {
-          newVisible.add(index);
-        }
+        elements.forEach((element, index) => {
+          const rect = element.getBoundingClientRect();
+          if (rect.top < window.innerHeight - 100 && !newVisible.has(index)) {
+            newVisible.add(index);
+            hasChanges = true;
+          }
+        });
+
+        return hasChanges ? newVisible : prev;
       });
-
-      setVisibleElements(newVisible);
     };
 
     handleScroll();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [visibleElements]);
+  }, []);
 
   return (
     <div className="font-sans bg-gray-50">

@@ -1,70 +1,82 @@
 "use client";
 
-import { useState } from 'react';
-import { ArrowLeft, Lock, Shield, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, Check, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
-// Mock Link component for demo - replace with actual next/link in your project
-const Link = ({ href, children, className = "" }: any) => (
-  <a href={href} className={className}>{children}</a>
-);
+export const dynamic = "force-dynamic"; // disable prerendering
 
 interface OrderSummaryProps {
-  plan: {
+  plan?: {
     name: string;
     price: number;
     features: string[];
   };
-  onBack: () => void;
+  onBack?: () => void;
 }
 
-export default function CheckoutPage({ plan, onBack }: OrderSummaryProps) {
-  const [selectedPayment, setSelectedPayment] = useState<string>('');
-  const [email, setEmail] = useState('');
+// ✅ Default plan to prevent build-time undefined errors
+const defaultPlan = {
+  name: "Starter Plan",
+  price: 99,
+  features: [
+    "Pre-optimized Fiverr profile setup",
+    "1-on-1 onboarding session",
+    "Three gig templates included",
+  ],
+};
+
+export default function CheckoutPage({
+  plan = defaultPlan,
+  onBack = () => window.history.back(),
+}: OrderSummaryProps) {
+  const [email, setEmail] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const paymentMethods = [
-    {
-      id: 'paystack',
-      name: 'PayStack',
-      description: 'All major cards and mobile money',
-      supportedNetworks: ['Visa', 'Mastercard', 'MTN Mobile Money', 'Airtel Money', 'Vodafone Cash']
-    },
-    {
-      id: 'momo',
-      name: 'MTN Mobile Money',
-      description: 'Pay with your MTN mobile wallet'
-    },
-    {
-      id: 'mpesa',
-      name: 'M-PESA',
-      description: 'Pay with your M-PESA account'
-    },
-    {
-      id: 'airtel',
-      name: 'Airtel Money',
-      description: 'Pay with your Airtel mobile wallet'
-    },
-    {
-      id: 'paypal',
-      name: 'PayPal',
-      description: 'Pay with your PayPal account'
-    }
-  ];
+  const [clientInfo, setClientInfo] = useState({
+    fullName: "",
+    phone: "",
+    country: "",
+    timezone: "",
+    skills: "",
+    niche: "",
+    experience: "",
+    targetClients: "",
+  });
 
-  const handlePayment = async () => {
-    if (!selectedPayment || !email) return;
-    
+  const handleInputChange = (field: string, value: string) => {
+    setClientInfo((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleOrder = async () => {
+    const requiredFields = ["fullName", "phone", "country", "skills", "email"];
+    const missingFields = requiredFields.filter((field) => {
+      if (field === "email") return !email;
+      return !clientInfo[field as keyof typeof clientInfo];
+    });
+
+    if (missingFields.length > 0) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
     setIsProcessing(true);
-    
-    // Simulate payment processing
+
     setTimeout(() => {
       setIsProcessing(false);
       setIsSuccess(true);
+      console.log("Client information:", clientInfo);
+      console.log("Selected plan:", plan);
+      console.log("Contact email:", email);
     }, 2000);
   };
 
@@ -77,13 +89,25 @@ export default function CheckoutPage({ plan, onBack }: OrderSummaryProps) {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                 <Check className="text-green-600" size={32} />
               </div>
-              <h2 className="text-3xl font-bold text-slate-900">Payment Successful!</h2>
+              <h2 className="text-3xl font-bold text-slate-900">
+                Order Received!
+              </h2>
               <p className="text-gray-600 text-lg">
-                Thank you for your purchase. Your {plan.name} account is being prepared.
+                Thank you for your order. Your {plan.name} request has been
+                received.
               </p>
-              <p className="text-gray-500">
-                You will receive an email at <strong>{email}</strong> with your account details within 24 hours.
-              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left max-w-md mx-auto">
+                <div className="flex items-center gap-2 text-blue-800 mb-2">
+                  <Clock size={20} />
+                  <h4 className="font-semibold">What happens next:</h4>
+                </div>
+                <ul className="text-blue-700 text-sm space-y-2">
+                  <li>• Our support team will contact you within 24 hours</li>
+                  <li>• We'll discuss your account requirements in detail</li>
+                  <li>• You'll receive payment instructions</li>
+                  <li>• Account setup begins after payment confirmation</li>
+                </ul>
+              </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
                 <Button asChild className="bg-green-600 hover:bg-green-700">
                   <Link href="/">Return Home</Link>
@@ -101,7 +125,7 @@ export default function CheckoutPage({ plan, onBack }: OrderSummaryProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
           <Button
@@ -112,29 +136,189 @@ export default function CheckoutPage({ plan, onBack }: OrderSummaryProps) {
             <ArrowLeft size={16} />
             Back to Accounts
           </Button>
-          <h1 className="text-3xl font-bold text-slate-900">Checkout</h1>
-          <p className="text-gray-600 mt-2">Complete your purchase securely</p>
+          <h1 className="text-3xl font-bold text-slate-900">Place Your Order</h1>
+          <p className="text-gray-600 mt-2">
+            Provide your details and our team will contact you
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Order Summary */}
-          <div>
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Personal Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Personal Information</CardTitle>
+                <p className="text-sm text-gray-600">
+                  We need this to understand your requirements
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name *</Label>
+                    <Input
+                      id="fullName"
+                      placeholder="John Doe"
+                      value={clientInfo.fullName}
+                      onChange={(e) =>
+                        handleInputChange("fullName", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      placeholder="+1234567890"
+                      value={clientInfo.phone}
+                      onChange={(e) =>
+                        handleInputChange("phone", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="country">Country *</Label>
+                    <Input
+                      id="country"
+                      placeholder="Your country"
+                      value={clientInfo.country}
+                      onChange={(e) =>
+                        handleInputChange("country", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="timezone">Timezone</Label>
+                    <Input
+                      id="timezone"
+                      placeholder="e.g., UTC+1, EST, etc."
+                      value={clientInfo.timezone}
+                      onChange={(e) =>
+                        handleInputChange("timezone", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Skills & Niche */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Skills & Services</CardTitle>
+                <p className="text-sm text-gray-600">
+                  Tell us about your skills and target market
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="skills">Your Skills & Services *</Label>
+                  <Textarea
+                    id="skills"
+                    placeholder="e.g., Graphic design, WordPress, Video editing"
+                    value={clientInfo.skills}
+                    onChange={(e) => handleInputChange("skills", e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="niche">Preferred Niche</Label>
+                    <Input
+                      id="niche"
+                      placeholder="e.g., Logo design, E-commerce"
+                      value={clientInfo.niche}
+                      onChange={(e) =>
+                        handleInputChange("niche", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="experience">Experience Level</Label>
+                    <Input
+                      id="experience"
+                      placeholder="Beginner, Intermediate, Expert"
+                      value={clientInfo.experience}
+                      onChange={(e) =>
+                        handleInputChange("experience", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="targetClients">Target Clients</Label>
+                  <Input
+                    id="targetClients"
+                    placeholder="e.g., Small businesses, Agencies"
+                    value={clientInfo.targetClients}
+                    onChange={(e) =>
+                      handleInputChange("targetClients", e.target.value)
+                    }
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Contact */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Contact Information</CardTitle>
+                <p className="text-sm text-gray-600">
+                  Where we should contact you
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Label htmlFor="contactEmail">Your Email Address *</Label>
+                  <Input
+                    id="contactEmail"
+                    type="email"
+                    placeholder="you@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Order Summary */}
             <Card>
               <CardHeader>
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="font-semibold text-lg text-slate-900">{plan.name}</h3>
-                  <p className="text-2xl font-bold text-green-600 mt-2">${plan.price}</p>
+                  <h3 className="font-semibold text-lg text-slate-900">
+                    {plan.name}
+                  </h3>
+                  <p className="text-2xl font-bold text-green-600 mt-2">
+                    ${plan.price}
+                  </p>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-slate-900 mb-3">What's included:</h4>
+                  <h4 className="font-medium text-slate-900 mb-3">
+                    What's included:
+                  </h4>
                   <ul className="space-y-2">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-center gap-3 text-gray-600">
-                        <Check size={16} className="text-green-600 flex-shrink-0" />
+                    {plan.features.map((feature, i) => (
+                      <li
+                        key={i}
+                        className="flex items-center gap-3 text-gray-600"
+                      >
+                        <Check
+                          size={16}
+                          className="text-green-600 flex-shrink-0"
+                        />
                         {feature}
                       </li>
                     ))}
@@ -143,135 +327,62 @@ export default function CheckoutPage({ plan, onBack }: OrderSummaryProps) {
 
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center text-lg font-semibold">
-                    <span>Total</span>
+                    <span>Total Amount</span>
                     <span>${plan.price}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Security Badges */}
-            <Card className="mt-6 bg-green-50 border-green-200">
-              <CardContent className="py-4">
-                <div className="flex items-center gap-4 text-green-800">
-                  <div className="flex items-center gap-2">
-                    <Lock size={20} />
-                    <span className="text-sm font-medium">Secure Payment</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Shield size={20} />
-                    <span className="text-sm font-medium">SSL Encrypted</span>
+            {/* Next Steps */}
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="py-6">
+                <div className="flex items-start gap-3">
+                  <Clock className="text-blue-600 mt-0.5 flex-shrink-0" size={20} />
+                  <div>
+                    <h4 className="font-semibold text-blue-900 mb-2">
+                      What happens after you order?
+                    </h4>
+                    <ul className="text-blue-800 text-sm space-y-2">
+                      <li>• Support team contacts you within 24 hours</li>
+                      <li>• Discuss your account requirements</li>
+                      <li>• Receive secure payment instructions</li>
+                      <li>• Setup begins after payment confirmation</li>
+                    </ul>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Payment Section */}
-          <div>
+            {/* Terms & Button */}
             <Card>
-              <CardHeader>
-                <CardTitle>Payment Method</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Email Input */}
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                  <p className="text-sm text-gray-500">
-                    We'll send your account details to this email
-                  </p>
-                </div>
-
-                {/* Payment Methods */}
-                <div className="space-y-4">
-                  <Label>Select Payment Method</Label>
-                  
-                  {paymentMethods.map((method) => (
-                    <div
-                      key={method.id}
-                      className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                        selectedPayment === method.id
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                      onClick={() => setSelectedPayment(method.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-4 h-4 rounded-full border-2 ${
-                              selectedPayment === method.id
-                                ? 'border-green-500 bg-green-500'
-                                : 'border-gray-300'
-                            }`}
-                          />
-                          <div>
-                            <h4 className="font-medium text-slate-900">{method.name}</h4>
-                            <p className="text-sm text-gray-600">{method.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Supported networks for PayStack */}
-                      {method.id === 'paystack' && selectedPayment === 'paystack' && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <p className="text-xs text-gray-500 mb-2">Supported networks:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {method.supportedNetworks?.map((network, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-                              >
-                                {network}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Terms */}
+              <CardContent className="space-y-6 pt-6">
                 <div className="text-xs text-gray-500 space-y-2">
                   <p>
-                    By completing this purchase, you agree to our{' '}
+                    By placing this order, you agree to our{" "}
                     <Link href="/terms" className="text-green-600 hover:underline">
                       Terms of Service
-                    </Link>{' '}
-                    and{' '}
+                    </Link>{" "}
+                    and{" "}
                     <Link href="/privacy" className="text-green-600 hover:underline">
                       Privacy Policy
                     </Link>
                     .
                   </p>
-                  <p>
-                    All accounts come with 30-day support and setup assistance. 
-                    Digital products are non-refundable once delivered.
-                  </p>
                 </div>
 
-                {/* Pay Button */}
                 <Button
                   className="w-full bg-green-600 hover:bg-green-700 py-6 text-lg font-semibold"
-                  disabled={!selectedPayment || !email || isProcessing}
-                  onClick={handlePayment}
+                  disabled={!email || isProcessing}
+                  onClick={handleOrder}
                 >
                   {isProcessing ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Processing...
+                      Placing Your Order...
                     </div>
                   ) : (
-                    `Pay $${plan.price}`
+                    `Place Your Order - $${plan.price}`
                   )}
                 </Button>
               </CardContent>

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Check, X, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import CheckoutPage from '../purchase-decision-form/page';
+
 
 // Mock Link component for demo - replace with actual next/link in your project
 const Link = ({ href, children, className = "", prefetch }: any) => (
@@ -13,6 +15,11 @@ const Link = ({ href, children, className = "", prefetch }: any) => (
 export default function AccountsPage() {
   const [visibleElements, setVisibleElements] = useState<Set<number>>(new Set());
   const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{
+    name: string;
+    price: number;
+    features: string[];
+  } | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,90 +46,145 @@ export default function AccountsPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // If checkout is open, show only checkout page
+  if (selectedPlan) {
+    return <CheckoutPage plan={selectedPlan} onBack={() => setSelectedPlan(null)} />;
+  }
+
+  const plans = {
+    starter: {
+      name: "Starter Account",
+      price: 150,
+      features: [
+        "Starter Fiverr Account ($150 value)",
+        "Free Hands-on Training Course (Worth $49 value)",
+        "Normal Order Traffic",
+        "Promotional Ads",
+        "14 Days Cash Clearance",
+        "4 Gigs",
+        "Private Community Access",
+      ]
+    },
+    professional: {
+      name: "Professional Account",
+      price: 370,
+      features: [
+        "Everything in Starter, plus:",
+        "Level 1 seller status",
+        "10 pre-loaded gigs with portfolio",
+        "High Order Traffic",
+        "Advanced keyword strategy",
+        "Competitor analysis",
+        "Promotional Coupons",
+        "Instant Cash Clearance",
+        "Instant support"
+      ]
+    },
+    premium: {
+      name: "Premium Account",
+      price: 750,
+      features: [
+        "Everything in Professional, plus:",
+        "Level 2 seller status",
+        "10 pre-loaded gigs with portfolio",
+        "Priority support 60 days",
+        "Competitor analysis report",
+      ]
+    },
+    bundle: {
+      name: "Ultimate Success Bundle",
+      price: 750,
+      features: [
+        "Premium Level 2 Account (Value $750)",
+        "Full Gig Domination Course (Value $49)",
+        "Lifetime Access to Tools & Resources (Value $97)",
+        "Priority 30-Day Instant Support (Included)"
+      ]
+    }
+  };
+
   return (
     <div className="font-sans bg-gray-50">
       {/* Navigation */}
-{/* Navigation */}
-<nav className="sticky top-0 z-50 bg-white shadow-sm">
-  <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-    {/* Logo */}
-    <Link href="/" className="flex items-center space-x-2">
-      <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-        <span className="text-white font-bold">F</span>
-      </div>
-      <span className="text-lg font-bold text-slate-900">
-        Fiverr<span className="text-green-600">Ascend</span>
-      </span>
-    </Link>
+      <nav className="sticky top-0 z-50 bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold">F</span>
+            </div>
+            <span className="text-lg font-bold text-slate-900">
+              Fiverr<span className="text-green-600">Ascend</span>
+            </span>
+          </Link>
 
-    {/* Hamburger (mobile only) */}
-    <button
-      className="md:hidden p-2 text-gray-700 hover:text-green-600 focus:outline-none"
-      onClick={() => setMenuOpen(!menuOpen)}
-    >
-      {menuOpen ? (
-        <X className="w-6 h-6" />
-      ) : (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M4 6h16M4 12h16M4 18h16"
-          />
-        </svg>
-      )}
-    </button>
+          {/* Hamburger (mobile only) */}
+          <button
+            className="md:hidden p-2 text-gray-700 hover:text-green-600 focus:outline-none"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            )}
+          </button>
 
-    {/* Desktop Menu */}
-    <div className="hidden md:flex items-center space-x-4">
-      <Link href="/" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
-        Home
-      </Link>
-      <Link href="/accounts" className="text-green-600 font-medium border-b-2 border-green-600">
-        Accounts
-      </Link>
-      <Link href="/training" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
-        Training
-      </Link>
-      <Link href="/tools" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
-        Tools
-      </Link>
-      <Button asChild className="bg-green-600 hover:bg-green-700">
-        <Link href="#pricing">Get Started</Link>
-      </Button>
-    </div>
-  </div>
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Link href="/" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
+              Home
+            </Link>
+            <Link href="/accounts" className="text-green-600 font-medium border-b-2 border-green-600">
+              Accounts
+            </Link>
+            <Link href="/training" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
+              Training
+            </Link>
+            <Link href="/tools" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
+              Tools
+            </Link>
+            <Button asChild className="bg-green-600 hover:bg-green-700">
+              <Link href="#pricing">Get Started</Link>
+            </Button>
+          </div>
+        </div>
 
-  {/* Mobile Menu */}
-  {menuOpen && (
-    <div className="md:hidden border-t border-gray-200 bg-white shadow-inner">
-      <div className="flex flex-col space-y-2 p-4">
-        <Link href="/" className="text-gray-700 hover:text-green-600 font-medium">
-          Home
-        </Link>
-        <Link href="/accounts" className="text-green-600 font-medium">
-          Accounts
-        </Link>
-        <Link href="/training" className="text-gray-700 hover:text-green-600 font-medium">
-          Training
-        </Link>
-        <Link href="/tools" className="text-gray-700 hover:text-green-600 font-medium">
-          Tools
-        </Link>
-        <Button asChild className="bg-green-600 hover:bg-green-700">
-          <Link href="#pricing">Get Started</Link>
-        </Button>
-      </div>
-    </div>
-  )}
-</nav>
-
+        {/* Mobile Menu */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-gray-200 bg-white shadow-inner">
+            <div className="flex flex-col space-y-2 p-4">
+              <Link href="/" className="text-gray-700 hover:text-green-600 font-medium">
+                Home
+              </Link>
+              <Link href="/accounts" className="text-green-600 font-medium">
+                Accounts
+              </Link>
+              <Link href="/training" className="text-gray-700 hover:text-green-600 font-medium">
+                Training
+              </Link>
+              <Link href="/tools" className="text-gray-700 hover:text-green-600 font-medium">
+                Tools
+              </Link>
+              <Button asChild className="bg-green-600 hover:bg-green-700">
+                <Link href="#pricing">Get Started</Link>
+              </Button>
+            </div>
+          </div>
+        )}
+      </nav>
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-green-600 to-slate-900 text-white relative overflow-hidden">
@@ -351,22 +413,17 @@ export default function AccountsPage() {
               </CardHeader>
               <CardContent className="pt-6">
                 <ul className="space-y-3 mb-6">
-                  {[
-                    "Starter Fiverr Account ($150 value)",
-                    "Free Hands-on Training Course (Worth $49 value)",
-                    "Normal Order Traffic",
-                    "Promotional Ads",
-                    "14 Days Cash Clearance",
-                    "4 Gigs",
-                    "Private Community Access",
-                  ].map((item, index) => (
+                  {plans.starter.features.map((item, index) => (
                     <li key={index} className="flex items-center">
                       <Check className="text-green-600 mr-3 flex-shrink-0" size={20} />
                       <span>{item}</span>
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full bg-gray-200 text-gray-800 hover:bg-gray-300">
+                <Button 
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  onClick={() => setSelectedPlan(plans.starter)}
+                >
                   Select Plan
                 </Button>
               </CardContent>
@@ -394,24 +451,17 @@ export default function AccountsPage() {
               </CardHeader>
               <CardContent className="pt-6">
                 <ul className="space-y-3 mb-6">
-                  {[
-                    'Everything in Starter, plus:',
-                    'Level 1 seller status',
-                    '10 pre-loaded gigs with portfolio',
-                    "High Order Traffic",
-                    'Advanced keyword strategy',
-                    'Competitor analysis',
-                    'Promotional Coupons',
-                    "Instant Cash Clearance",
-                    'Instant support'
-                  ].map((item, index) => (
+                  {plans.professional.features.map((item, index) => (
                     <li key={index} className="flex items-center">
                       <Check className="text-green-600 mr-3 flex-shrink-0" size={20} />
                       <span>{item}</span>
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full bg-green-600 hover:bg-green-700">
+                <Button 
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  onClick={() => setSelectedPlan(plans.professional)}
+                >
                   Select Plan
                 </Button>
               </CardContent>
@@ -436,20 +486,17 @@ export default function AccountsPage() {
               </CardHeader>
               <CardContent className="pt-6">
                 <ul className="space-y-3 mb-6">
-                  {[
-                    'Everything in Professional, plus:',
-                    'Level 2 seller status',
-                    '10 pre-loaded gigs with portfolio',
-                    'Priority support 60 days',
-                    'Competitor analysis report',
-                  ].map((item, index) => (
+                  {plans.premium.features.map((item, index) => (
                     <li key={index} className="flex items-center">
                       <Check className="text-green-600 mr-3 flex-shrink-0" size={20} />
                       <span>{item}</span>
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full bg-gray-200 text-gray-800 hover:bg-gray-300">
+                <Button 
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  onClick={() => setSelectedPlan(plans.premium)}
+                >
                   Select Plan
                 </Button>
               </CardContent>
@@ -468,12 +515,7 @@ export default function AccountsPage() {
                 <span className="block text-yellow-400 font-bold">Save $146</span>
               </div>
               <ul className="text-left space-y-2 text-white opacity-90">
-                {[
-                  'Premium Level 2 Account (Value $750)',
-                  'Full Gig Domination Course (Value $49)',
-                  'Lifetime Access to Tools & Resources (Value $97)',
-                  'Priority 30-Day Instant Support (Included)'
-                ].map((item, index) => (
+                {plans.bundle.features.map((item, index) => (
                   <li key={index} className="flex items-center">
                     <Check className="text-yellow-400 mr-2 flex-shrink-0" size={20} />
                     <span>{item}</span>
@@ -481,8 +523,11 @@ export default function AccountsPage() {
                 ))}
               </ul>
             </div>
-            <Button asChild className="bg-yellow-400 text-slate-900 hover:bg-yellow-500 px-8 py-6 text-lg font-bold">
-              <Link href="#pricing">Get the Ultimate Bundle</Link>
+            <Button 
+              className="bg-yellow-400 text-slate-900 hover:bg-yellow-500 px-8 py-6 text-lg font-bold"
+              onClick={() => setSelectedPlan(plans.bundle)}
+            >
+              Get the Ultimate Bundle
             </Button>
           </div>
         </div>
