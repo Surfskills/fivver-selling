@@ -12,6 +12,7 @@ const Link = ({ href, children, className = "", prefetch }: any) => (
 
 export default function AccountsPage() {
   const [visibleElements, setVisibleElements] = useState<Set<number>>(new Set());
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,36 +42,87 @@ export default function AccountsPage() {
   return (
     <div className="font-sans bg-gray-50">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">F</span>
-            </div>
-            <span className="text-lg font-bold text-slate-900">
-              Fiverr<span className="text-green-600">Ascend</span>
-            </span>
-          </Link>
+{/* Navigation */}
+<nav className="sticky top-0 z-50 bg-white shadow-sm">
+  <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+    {/* Logo */}
+    <Link href="/" className="flex items-center space-x-2">
+      <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+        <span className="text-white font-bold">F</span>
+      </div>
+      <span className="text-lg font-bold text-slate-900">
+        Fiverr<span className="text-green-600">Ascend</span>
+      </span>
+    </Link>
 
-          <div className="flex items-center space-x-4">
-            <Link href="/" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
-              Home
-            </Link>
-            <Link href="/accounts" className="text-green-600 font-medium border-b-2 border-green-600">
-              Accounts
-            </Link>
-            <Link href="/training" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
-              Training
-            </Link>
-            <Link href="/tools" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
-              Tools
-            </Link>
-            <Button asChild className="bg-green-600 hover:bg-green-700">
-              <Link href="#pricing">Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </nav>
+    {/* Hamburger (mobile only) */}
+    <button
+      className="md:hidden p-2 text-gray-700 hover:text-green-600 focus:outline-none"
+      onClick={() => setMenuOpen(!menuOpen)}
+    >
+      {menuOpen ? (
+        <X className="w-6 h-6" />
+      ) : (
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      )}
+    </button>
+
+    {/* Desktop Menu */}
+    <div className="hidden md:flex items-center space-x-4">
+      <Link href="/" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
+        Home
+      </Link>
+      <Link href="/accounts" className="text-green-600 font-medium border-b-2 border-green-600">
+        Accounts
+      </Link>
+      <Link href="/training" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
+        Training
+      </Link>
+      <Link href="/tools" className="text-gray-600 hover:text-green-600 font-medium transition-colors">
+        Tools
+      </Link>
+      <Button asChild className="bg-green-600 hover:bg-green-700">
+        <Link href="#pricing">Get Started</Link>
+      </Button>
+    </div>
+  </div>
+
+  {/* Mobile Menu */}
+  {menuOpen && (
+    <div className="md:hidden border-t border-gray-200 bg-white shadow-inner">
+      <div className="flex flex-col space-y-2 p-4">
+        <Link href="/" className="text-gray-700 hover:text-green-600 font-medium">
+          Home
+        </Link>
+        <Link href="/accounts" className="text-green-600 font-medium">
+          Accounts
+        </Link>
+        <Link href="/training" className="text-gray-700 hover:text-green-600 font-medium">
+          Training
+        </Link>
+        <Link href="/tools" className="text-gray-700 hover:text-green-600 font-medium">
+          Tools
+        </Link>
+        <Button asChild className="bg-green-600 hover:bg-green-700">
+          <Link href="#pricing">Get Started</Link>
+        </Button>
+      </div>
+    </div>
+  )}
+</nav>
+
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-green-600 to-slate-900 text-white relative overflow-hidden">
